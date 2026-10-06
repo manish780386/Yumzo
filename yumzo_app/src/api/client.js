@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Point this at your Django backend. Use your machine's LAN IP (not localhost)
 // when testing on a physical phone, e.g. http://192.168.1.5:8000
-export const BASE_URL = 'http://172.27.48.1'; // 10.0.2.2 = Android emulator's localhost alias
+export const BASE_URL = 'http://10.21.165.192:8000'; // 10.0.2.2 = Android emulator's localhost alias
 
 const apiClient = axios.create({
   baseURL: `${BASE_URL}/api`,

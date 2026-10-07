@@ -25,7 +25,13 @@ export default function PhoneLoginScreen({ navigation }) {
 
     setLoading(true);
     try {
-      await requestOTP(cleaned);
+      const { data } = await requestOTP(cleaned);
+      // TEMPORARY: backend has no SMS gateway yet, so it returns the OTP in
+      // the response (otp_debug) instead of texting it. Remove this Alert
+      // once MSG91/Twilio is integrated — see RequestOTPView in users/views.py.
+      if (data.otp_debug) {
+        Alert.alert('Dev Mode — OTP', `Your OTP is: ${data.otp_debug}`);
+      }
       navigation.navigate('OTPVerify', { phone: cleaned });
     } catch (error) {
       Alert.alert('Error', 'Could not send OTP. Please try again.');

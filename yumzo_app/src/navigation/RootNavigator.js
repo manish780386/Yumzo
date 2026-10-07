@@ -10,8 +10,8 @@ import OTPVerifyScreen from '../screens/OTPVerifyScreen';
 import ProfileSetupScreen from '../screens/ProfileSetupScreen';
 import HomeScreen from '../screens/HomeScreen';
 import PlansScreen from '../screens/PlansScreen';
-import SubscriptionScreen from '../screens/SubscriptionScreen';
-import OrderHistoryScreen from '../screens/OrderHistoryScreen';
+import SubscriptionScreen from '../screens/Subscriptionscreen.js';
+import OrderHistoryScreen from '../screens/Orderhistoryscreen.js';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();

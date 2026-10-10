@@ -37,3 +37,8 @@ export const getWallet = () => apiClient.get('/subscriptions/wallet/');
 export const getTodayOrders = () => apiClient.get('/orders/today/');
 
 export const getOrderHistory = () => apiClient.get('/orders/history/');
+
+// --- Home screen: today's menu, last-call deals ---
+export const getTodayMenu = () => apiClient.get('/kitchens/today/');
+
+export const claimDeal = (deal_id) => apiClient.post('/orders/claim-deal/', { deal_id });

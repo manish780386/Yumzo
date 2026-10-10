@@ -11,6 +11,7 @@ from .serializers import (
     WalletSerializer,
 )
 from orders.models import Order
+from orders.rules import can_skip
 
 
 class SubscriptionPlanListView(generics.ListAPIView):
@@ -72,6 +73,12 @@ class SkipTodayMealView(APIView):
             order = Order.objects.get(id=order_id, subscriber=request.user, status=Order.Status.SCHEDULED)
         except Order.DoesNotExist:
             return Response({"error": "Order not found or cannot be skipped"}, status=400)
+
+        if not can_skip(order.meal_type, order.scheduled_date):
+            return Response(
+                {"error": "Too late to skip this meal - the kitchen has already planned it"},
+                status=400,
+            )
 
         order.status = Order.Status.SKIPPED
         order.save(update_fields=["status"])

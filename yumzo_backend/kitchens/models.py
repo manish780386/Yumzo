@@ -1,3 +1,4 @@
+import datetime
 import uuid
 from django.db import models
 
@@ -61,3 +62,49 @@ class KitchenReview(models.Model):
     rating = models.PositiveSmallIntegerField()  # 1-5
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class LastCallDeal(models.Model):
+    """
+    Surplus-meal flash deal. The kitchen lists leftover portions for a day and
+    they go on sale at a discount (default 25%) from `start_time` (default
+    12:00 noon) until `end_time`. Limited by `portions_left`, so a deal can
+    never oversell and can't eat into subscription revenue unboundedly.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    kitchen = models.ForeignKey(CloudKitchen, on_delete=models.CASCADE, related_name="deals")
+    deal_date = models.DateField(db_index=True)
+    meal_type = models.CharField(max_length=10, choices=MenuItem.MealType.choices)
+    item_name = models.CharField(max_length=200)
+
+    original_price = models.DecimalField(max_digits=8, decimal_places=2)
+    discount_percent = models.PositiveSmallIntegerField(default=25)
+    portions_total = models.PositiveIntegerField()
+    portions_left = models.PositiveIntegerField()
+
+    start_time = models.TimeField(default=datetime.time(12, 0))
+    end_time = models.TimeField(default=datetime.time(21, 0))
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("kitchen", "deal_date", "meal_type")
+
+    @property
+    def discounted_price(self):
+        from decimal import Decimal
+        factor = Decimal(100 - self.discount_percent) / Decimal(100)
+        return (self.original_price * factor).quantize(Decimal("0.01"))
+
+    def is_live(self, local_now):
+        """True when this deal can be claimed right now (local_now is tz-aware, local time)."""
+        return (
+            self.is_active
+            and self.portions_left > 0
+            and self.deal_date == local_now.date()
+            and self.start_time <= local_now.time() <= self.end_time
+        )
+
+    def __str__(self):
+        return f"{self.kitchen.name} - {self.item_name} ({self.discount_percent}% off, {self.deal_date})"
